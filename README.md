@@ -3,6 +3,8 @@ What is this?
 
 This is a proof of concept to show an implementation of *autonomous agents* combined with *genetic algorithms*.
 
+######[Live Demo](http://cazala.github.io/shoal/)
+
 ###Autonomous Agents
 
 - **Limited ability to perceive the environment:** Every fish can only see things (other fish and food) within a restricted range.
