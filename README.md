@@ -3,7 +3,7 @@ What is this?
 
 This is a proof of concept to show an implementation of *autonomous agents* combined with *genetic algorithms*.
 
-######[Live Demo](http://cazala.github.io/shoal/)
+####[Live Demo](http://cazala.github.io/shoal/)
 
 ###Autonomous Agents
 
