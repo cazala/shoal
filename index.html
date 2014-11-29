@@ -1,0 +1,143 @@
+<html>
+	<head>
+		<title>Shoal - Autonomous agents + genetic algorithms in Javascript</title>
+		<script src="vendor/jquery.js"></script>
+		<script src="src/vector.js"></script>
+		<script src="src/food.js"></script>
+		<script src="src/fish.js"></script>
+		<script src="src/sea.js"></script>
+		<style>
+		body {
+			width: 100%; 
+			height: 100%; 
+			margin: 0px;
+			font-family: 'Open Sans', sans-serif;
+
+		}
+		#info{
+			font-family: arial;
+			font-size: 13px;
+			color: gray;
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			display: inline-block;
+		}
+		#about{
+			position: fixed;
+			width: 1024;
+			left: 50%;
+			margin-left: -512px;
+			top: 50%;
+			margin-top: -200px;
+			opacity: 0;
+			transition: opacity .5s ease;
+			-webkit-transition: opacity .5s ease;
+		}
+		#header{
+			margin-bottom: 40px;
+			text-align: center;
+			cursor: default;
+		}
+		#autonomous-agents{
+			left: 0px;
+		}
+		#genetic-algorithms{
+			right: 0px;
+		}
+		.about-block{
+			position: absolute;
+			width: 500px;
+		}
+		.about-block span{
+			font-weight: bold;
+		}
+		.about-block div{
+			font-size: 14px;
+			color: rgb(48, 48, 48);
+			text-align: justify;
+			-webkit-user-select: none; /* Chrome/Safari */        
+			-moz-user-select: none; /* Firefox */
+			-ms-user-select: none; /* IE10+ */
+
+			/* Rules below not implemented in browsers yet */
+			-o-user-select: none;
+			user-select: none;
+			cursor: default;
+		}
+		#cover{
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			background-color: white;
+			opacity: 0;
+			transition: opacity .5s ease;
+			-webkit-transition: opacity .5s ease;
+			cursor: default;
+		}
+
+		.about #about{
+			opacity: 1;
+			
+		}
+		.about #cover{
+			opacity: .9;
+		}
+
+		#about-button{
+			position: fixed;
+			font-weight: bold;
+			top: 10px;
+			left: 50%;
+			margin-left: -59px;
+			color: gray;
+			cursor: pointer;
+		}
+
+		#about-button:hover{
+			color: black;
+		}
+
+		#footer{
+			position: fixed;
+			bottom: 10px;
+			left: 50%;
+			margin-left: -150px;
+			font-size: 13px;
+			color: gray;
+			cursor: pointer;
+			width: 300px;
+			text-align: center;
+		}
+		</style>
+	</head>
+	<body>
+		<div id="cover"></div>
+		<span id="info"></span>
+		<span id="about-button">WHAT IS THIS?</span>
+		<div id="about">
+			<div id="header">This is a proof of concept to show an implementation of <i>autonomous agents</i> combined with <i>genetic algorithms</i>.</div>
+			<div id="autonomous-agents" class="about-block">
+				<span>Autonomous Agents</span>
+				<div>
+					<p><b>Limited ability to perceive the environment:</b> Every fish can only see things (other fish and food) within a restricted range.</p>
+					<p><b>Process information from environment and compute an action:</b> In this case the actions are computed as forces (vectors). If the environment tells the fish that there's a huge scary fish ahead, the action will be a force in the oposite direction, or if the fish sees food, a force will pull it towards it. There are social behaviors like shoaling/schooling that come from basic separation, alignment and cohesion forces. There are also evolutionary strategies, like the affinity for other fishes of a similar color, this promotes the generation of different races. All these forces are added-up at every time-step and result making the fish decide in which direction to swim.</p>
+					<p><b>No leader:</b> The fishes are not commanded by a leader to display complex behaviors like shoaling/schooling , this intelligent and structured dynamics emerge from local interactions from the agents themselves.</p>
+				</div>
+			</div>
+			<div id="genetic-algorithms" class="about-block">
+				<span>Genetic Algorithms</span>
+				<div>
+				<p><b>Population:</b> The population of fishes is randomly generated with random values for their DNA. The genotype of a fish consists basically on 2 variables (mass and hue), which basically then produce the phenotype of the fish (color, size, max speed, range of view, maturity threshold, bite size, etc).
+				<p><b>Selection:</b> Fishes are born with a certain amount of energy that they will spend to move (swim), when they run out of it they die. They can eat food to gain energy, and also they can eat other fishes that are smaller than them (less than half of their mass). The more energy they can collect, the longer they will live.</p>
+				<p><b>Reproduction:</b> Agents can spawn offsprings, they have to reach a certain age (it varies depending on the mass of the fish), once they do, they are able to mate, therefore perpetuating their genes. When they mate, the fertility threshold is increased again, and if the fish collects enough food to live longer it can mate several times, but the older the fish gets the more energy consumes to swim, so in the end every fish dies.</p>
+				<p><b>Crossover and Mutation:</b> The offsprings are a crossover of the genes of their parents (if one parent is big and the other one is small, the child will be medium sized, if one is red and the other one is blue, the child will be purple), but a really small fraction of the offsprings get mutated genes, introducing new features to the population.</p>
+				</div>
+			</div>
+		</div>
+		<span id="footer">click anywhere to <b>enter</b> behaviour inspector</span>
+		<canvas id="canvas"></canvas>
+	</body>
+</html>
