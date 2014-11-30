@@ -108,8 +108,3 @@ Vector.prototype = {
 		return new Vector(this.x, this.y);
 	}
 }
-
-Vector.noise =function(offset, mag)
-{
-	return new Vector((Math.random() * 2 - 1) * mag,(Math.random() * 2 - 1) * mag);
-}
