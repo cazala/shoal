@@ -14,7 +14,7 @@ function Fish(mass, x, y, hue)
 {
 	// fish's properties
 	this.ID = Fish.uid();
-	this.mass = mass;
+	this.mass = mass > 0 ? mass : -mass;
 	this.energy = this.mass * ENERGY;
 	this.maxspeed = MAX_SPEED * this.mass;
 	this.maxforce = MAX_FORCE / (this.mass * this.mass);
@@ -181,7 +181,7 @@ Fish.prototype = {
 		var affinity = this.affinity(fishList);
 		
 		// shoal with fishes of very different colors won't stay together as tightly as shoals of fishes of the same color
-		separation.mul(1.4 * affinity);
+		separation.mul(1.2);
 		alignment.mul(1.2 * affinity);
 		cohesion.mul(1 * affinity);
 
