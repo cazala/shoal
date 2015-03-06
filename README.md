@@ -15,7 +15,7 @@ This is a proof of concept to show an implementation of *autonomous agents* comb
 
 ###Genetic Algorithms
 	
-- **Population:** The population of fishes is randomly generated with random values for their DNA. The genotype of a fish consists basically of 2 variables mass and hue, which basically then produce the phenotype of the fish (color, size, max speed, range of view, maturity threshold, bite size, etc).
+- **Population:** The population of fishes is randomly generated with random values for their DNA. The genotype of a fish consists basically of 2 genes (mass and hue), which basically then produce the phenotype of the fish (color, size, max speed, range of view, maturity threshold, bite size, etc).
 
 - **Selection:** Fishes are born with a certain amount of energy that they will spend to move (swim), and when they run out of it they die. They can eat food to gain energy, and also they can eat other fishes that are smaller than them (less than half of their mass). The more energy they can collect, the longer they will live.
 
