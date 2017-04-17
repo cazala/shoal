@@ -3,9 +3,9 @@ What is this?
 
 This is a proof of concept to show an implementation of *autonomous agents* combined with *genetic algorithms*.
 
-####[Live Demo](http://cazala.github.io/shoal/)
+#### [Live Demo](http://cazala.github.io/shoal/)
 
-###Autonomous Agents
+### Autonomous Agents
 
 - **Limited ability to perceive the environment:** Every fish can only see things (other fish and food) within a restricted range.
 
@@ -13,7 +13,7 @@ This is a proof of concept to show an implementation of *autonomous agents* comb
 
 - **No leader:** The fishes are not commanded by a leader to display complex behaviors like shoaling/schooling; these intelligent and structured dynamics emerge from local interactions from the agents themselves.
 
-###Genetic Algorithms
+### Genetic Algorithms
 	
 - **Population:** The population of fishes is randomly generated with random values for their DNA. The genotype of a fish consists basically of 2 genes (mass and hue), which basically then produce the phenotype of the fish (color, size, max speed, range of view, maturity threshold, bite size, etc).
 
@@ -23,4 +23,4 @@ This is a proof of concept to show an implementation of *autonomous agents* comb
 
 - **Crossover and Mutation:** The offsprings are a crossover of the genes of their parents (if one parent is big and the other one is small, the child will be medium sized; if one is red and the other one is blue, the child will be purple), but a really small fraction of the offsprings get mutated genes, thus introducing new features to the population.
 
-######Inspired by [The Nature of Code](http://natureofcode.com/)
+###### Inspired by [The Nature of Code](http://natureofcode.com/)
