@@ -1,127 +1,117 @@
-var Food = require('./food')
-var Fish = require('./fish')
+const EventEmitter = require('events')
+const Fish = require('./Fish')
+const seedrandom = require('seedrandom')
 
-// POPULATION SETUP
-var POPULATION = 20
-var MIN_MASS = 0.5
-var MAX_MASS = 3.5
-var FOOD_RATIO = 0.2
-var SCREEN = 1.5
+class Sea extends EventEmitter {
+  constructor(fish, width, height, seed) {
+    super()
+    this.fish = []
+    this.width = width
+    this.height = height
+    this.interval = null
+    this.seed = seed || Math.random()
+    this.random = seedrandom(this.seed)
 
-// THE SEA
-sea = {
-  width: 1000,
-  height: 1000,
-  population: [],
-  food: []
-}
-
-// internal use
-var time = null
-var interval = 20
-var steps = 0
-
-// populate the sea
-for (var i = 0; i < POPULATION; i++) {
-  // random setup
-  var randomX = Math.random() * sea.width
-  var randomY = Math.random() * sea.height
-  var randomMass =
-    MIN_MASS +
-    Math.random() * Math.random() * Math.random() * Math.random() * MAX_MASS
-
-  // create fish
-  var fish = new Fish(randomMass, randomX, randomY)
-
-  // add fish to the sea population
-  sea.population.push(fish)
-}
-
-// add food to the sea
-var initialFood = POPULATION * FOOD_RATIO
-for (var i = 0; i < initialFood; i++) {
-  // initial values
-  var randomX = Math.random() * sea.width
-  var randomY = Math.random() * sea.height
-  var foodAmmount = Math.random() * 100 + 20
-
-  // create food
-  var food = new Food(randomX, randomY, foodAmmount)
-  sea.food.push(food)
-}
-
-// one time-step of the timeline loop
-var step = function() {
-  // update the food
-  for (var i in sea.food) {
-    var food = sea.food[i]
-
-    if (food && !food.dead) {
-      // food.draw(ctx)
-      food.update(sea)
+    if (typeof fish === 'number') {
+      for (let i = 0; i < fish; i++) {
+        const mass = 0.5 + this.random() * 0.2
+        const x = this.random() * this.width
+        const y = this.random() * this.height
+        this.fish.push(new Fish(mass, x, y))
+      }
+    } else if (Array.isArray(fish)) {
+      for (let i = 0; i < fish.length; i++) {
+        this.fish.push(Fish.fromJSON(fish[i]))
+      }
     } else {
-      sea.food[i] = null
-      if (Math.random() < 0.001)
-        sea.food[i] = new Food(
-          Math.random() * sea.width,
-          Math.random() * sea.height,
-          Math.random() * 100 + 20
+      throw new Error(
+        'Argument `fish` must a number or an array of Fish#toJSON()'
+      )
+    }
+  }
+
+  step() {
+    for (let i = 0; i < this.fish.length; i++) {
+      const fish = this.fish[i]
+      const neighbors = fish.look(this.fish, 100 * fish.mass, Math.PI * 2)
+
+      const friends = []
+      for (let j = 0; j < neighbors.length; j++) {
+        if (
+          neighbors[j].mass < fish.mass * 2 &&
+          neighbors[j].mass < fish.mass * 2
         )
+          friends.push(neighbors[j])
+      }
+
+      if (friends.length > 0) {
+        fish.shoal(friends)
+      } else {
+        fish.wander(200)
+      }
+
+      fish.boundaries(this.width, this.height)
+
+      const bigger = []
+      for (let j = 0; j < neighbors.length; j++) {
+        if (neighbors[j].mass > fish.mass * 2) {
+          bigger.push(neighbors[j])
+        }
+      }
+
+      if (bigger.length > 0) {
+        fish.avoid(bigger, 300)
+      }
+
+      const smaller = []
+      for (let j = 0; j < neighbors.length; j++) {
+        if (neighbors[j].mass < fish.mass / 2) {
+          smaller.push(neighbors[j])
+        }
+      }
+      if (smaller.length > 0) {
+        fish.chase(smaller)
+      }
+
+      fish.update()
+      this.emit('update', fish)
     }
   }
 
-  // list of fish that died during this time-step
-  var deadList = []
+  start(ms = 16) {
+    this.stop()
+    this.interval = setInterval(() => this.step(), ms)
+  }
 
-  // update all the fishes
-  for (var i in sea.population) {
-    // current fish
-    var fish = sea.population[i]
-
-    // if the fish is dead or null, skip it
-    if (fish == null) {
-      deadList.push(i)
-      continue
-    }
-
-    // makes the fish compute an action (which direction to swim) according to the information it can get from the environment
-    fish.swim(sea)
-
-    // update the fish (position and state)
-    fish.update(sea)
-
-    // draw the fish
-    // fish.draw(ctx)
-
-    // if dead, add the fish to the dead list
-    if (fish.dead) {
-      sea.population[i] = null
-      deadList.push(i)
+  stop() {
+    if (this.interval) {
+      clearInterval(this.interval)
     }
   }
 
-  // clean all the dead fishes from the sea population
-  for (var j in deadList) sea.population.splice(deadList[j], 1)
+  render(ctx) {
+    ctx.clearRect(0, 0, this.width, this.height)
+    for (let i = 0; i < this.fish.length; i++) {
+      const fish = this.fish[i]
+      fish.render(ctx)
+    }
+  }
+
+  toJSON(stringify = true) {
+    const data = {
+      fish: this.fish.map(fish => fish.toJSON(stringify)),
+      width: this.width,
+      height: this.height,
+      seed: this.seed
+    }
+    return stringify ? JSON.stringify(data, null, 2) : data
+  }
 }
 
-// kick it off!
-setInterval(step, interval)
+Sea.fromJSON = function(json) {
+  const { fish, width, height, seed } =
+    typeof json === 'string' ? JSON.parse(json) : json
+  return new Sea(fish, width, height, seed)
+}
 
-// server
-
-var express = require('express')
-var app = express()
-
-app.use(express.json())
-
-app.use('/sea', (req, res) => {
-  res.json({
-    fish: sea.population.map(fish => ({
-      position: [fish.location.x, fish.location.y, 0],
-      rotation: [0, 0, fish.velocity.angle()],
-      scale: fish.mass
-    }))
-  })
-})
-
-app.listen(9999)
+module.exports = Sea

@@ -1,94 +1,126 @@
-// helper library to work with vectors
+class Vector {
+  constructor(x, y) {
+    this.x = x
+    this.y = y
+  }
 
-function Vector(x, y) {
-  this.x = x
-  this.y = y
-}
-
-Vector.prototype = {
-  set: function(x, y) {
+  set(x, y) {
     this.x = x
     this.y = y
 
     return this
-  },
-  add: function(v) {
-    this.x += v.x
-    this.y += v.y
+  }
+
+  add(vec) {
+    this.x += vec.x
+    this.y += vec.y
 
     return this
-  },
-  sub: function(v) {
-    this.x -= v.x
-    this.y -= v.y
+  }
+
+  sub(vec) {
+    this.x -= vec.x
+    this.y -= vec.y
 
     return this
-  },
-  mul: function(s) {
-    this.x *= s
-    this.y *= s
+  }
+
+  mul(scalar) {
+    this.x *= scalar
+    this.y *= scalar
 
     return this
-  },
-  div: function(s) {
-    !s && console.log('Division by zero!')
+  }
 
-    this.x /= s
-    this.y /= s
+  div(scalar) {
+    !scalar && console.log('Division by zero!')
+
+    this.x /= scalar
+    this.y /= scalar
 
     return this
-  },
-  mag: function() {
+  }
+
+  mag() {
     return Math.sqrt(this.x * this.x + this.y * this.y)
-  },
-  normalize: function() {
-    var mag = this.mag()
-    mag && this.div(mag)
+  }
+
+  normalize() {
+    const mag = this.mag()
+    if (mag) {
+      this.div(mag)
+    }
     return this
-  },
-  angle: function() {
+  }
+
+  angle() {
     return Math.atan2(this.y, this.x)
-  },
-  setMag: function(m) {
-    var angle = this.angle()
-    this.x = m * Math.cos(angle)
-    this.y = m * Math.sin(angle)
+  }
+
+  setMag(mag) {
+    const angle = this.angle()
+    this.x = mag * Math.cos(angle)
+    this.y = mag * Math.sin(angle)
     return this
-  },
-  setAngle: function(a) {
-    var mag = this.mag()
-    this.x = mag * Math.cos(a)
-    this.y = mag * Math.sin(a)
+  }
+
+  setAngle(angle) {
+    const mag = this.mag()
+    this.x = mag * Math.cos(angle)
+    this.y = mag * Math.sin(angle)
     return this
-  },
-  rotate: function(a) {
+  }
+
+  rotate(a) {
     this.setAngle(this.angle() + a)
     return this
-  },
-  limit: function(l) {
-    var mag = this.mag()
-    if (mag > l) this.setMag(l)
+  }
+
+  limit(limit) {
+    const mag = this.mag()
+    if (mag > limit) {
+      this.setMag(limit)
+    }
     return this
-  },
-  angleBetween: function(v) {
-    return this.angle() - v.angle()
-  },
-  dot: function(v) {
-    return this.x * v.x + this.y * v.y
-  },
-  lerp: function(v, amt) {
-    this.x += (v.x - this.x) * amt
-    this.y += (v.y - this.y) * amt
+  }
+
+  angleBetween(vec) {
+    return this.angle() - vec.angle()
+  }
+
+  dot(vec) {
+    return this.x * vec.x + this.y * vec.y
+  }
+
+  lerp(vec, amount) {
+    this.x += (vec.x - this.x) * amount
+    this.y += (vec.y - this.y) * amount
     return this
-  },
-  dist: function(v) {
-    var dx = this.x - v.x
-    var dy = this.y - v.y
+  }
+
+  dist(vec) {
+    const dx = this.x - vec.x
+    const dy = this.y - vec.y
     return Math.sqrt(dx * dx + dy * dy)
-  },
-  copy: function() {
+  }
+
+  copy() {
     return new Vector(this.x, this.y)
   }
+
+  toJSON(stringify = true) {
+    const data = {
+      x: this.x,
+      y: this.y
+    }
+
+    return stringify ? JSON.stringify(data, null, 2) : data
+  }
+}
+
+Vector.fromJSON = function(json) {
+  const { x, y } = typeof json === 'string' ? JSON.parse(json) : json
+  return new Vector(x, y)
 }
 
 module.exports = Vector
