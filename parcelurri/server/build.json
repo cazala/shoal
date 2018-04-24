@@ -1,0 +1,7 @@
+[
+  {
+    "name": "Compile systems",
+    "kind": "TSC",
+    "config": "tsconfig.json"
+  }
+]
