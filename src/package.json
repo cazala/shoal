@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "events": "^2.0.0",
+    "seedrandom": "^2.4.3"
+  }
 }
