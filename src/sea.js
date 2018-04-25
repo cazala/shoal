@@ -2,22 +2,28 @@ const EventEmitter = require('events')
 const Fish = require('./Fish')
 const seedrandom = require('seedrandom')
 
+const MASS = 0.5
 class Sea extends EventEmitter {
-  constructor(fish, width, height, seed) {
+  constructor(fish, width, height, depth, seed) {
     super()
     this.fish = []
     this.width = width
     this.height = height
+    this.depth = depth
     this.interval = null
     this.seed = seed || Math.random()
     this.random = seedrandom(this.seed)
 
     if (typeof fish === 'number') {
       for (let i = 0; i < fish; i++) {
-        const mass = 0.5 + this.random() * 0.2
+        let mass = MASS + this.random() * (MASS / 5 * 2)
+        if (i == 0) {
+          mass = MASS * 3
+        }
         const x = this.random() * this.width
         const y = this.random() * this.height
-        this.fish.push(new Fish(mass, x, y))
+        const z = this.random() * this.depth
+        this.fish.push(new Fish(mass, x, y, z))
       }
     } else if (Array.isArray(fish)) {
       for (let i = 0; i < fish.length; i++) {
@@ -33,12 +39,12 @@ class Sea extends EventEmitter {
   step() {
     for (let i = 0; i < this.fish.length; i++) {
       const fish = this.fish[i]
-      const neighbors = fish.look(this.fish, 100 * fish.mass, Math.PI * 2)
+      const neighbors = fish.look(this.fish, 200 * fish.mass, Math.PI * 2)
 
       const friends = []
       for (let j = 0; j < neighbors.length; j++) {
         if (
-          neighbors[j].mass < fish.mass * 2 &&
+          neighbors[j].mass > fish.mass / 2 &&
           neighbors[j].mass < fish.mass * 2
         )
           friends.push(neighbors[j])
@@ -50,7 +56,7 @@ class Sea extends EventEmitter {
         fish.wander(200)
       }
 
-      fish.boundaries(this.width, this.height)
+      fish.boundaries(this.width, this.height, this.depth)
 
       const bigger = []
       for (let j = 0; j < neighbors.length; j++) {
@@ -102,6 +108,7 @@ class Sea extends EventEmitter {
       fish: this.fish.map(fish => fish.toJSON(stringify)),
       width: this.width,
       height: this.height,
+      depth: this.depth,
       seed: this.seed
     }
     return stringify ? JSON.stringify(data, null, 2) : data
@@ -109,9 +116,9 @@ class Sea extends EventEmitter {
 }
 
 Sea.fromJSON = function(json) {
-  const { fish, width, height, seed } =
+  const { fish, width, height, depth, seed } =
     typeof json === 'string' ? JSON.parse(json) : json
-  return new Sea(fish, width, height, seed)
+  return new Sea(fish, width, height, depth, seed)
 }
 
 module.exports = Sea

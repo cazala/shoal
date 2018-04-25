@@ -1,5 +1,5 @@
 const main = async () => {
-  const resp = await fetch('http://192.168.0.56:9999/sea')
+  const resp = await fetch('http://localhost:9999/sea')
   const data = await resp.json()
   const sea = Shoal.Sea.fromJSON(data)
   sea.start()
@@ -14,7 +14,7 @@ const main = async () => {
     fishById[fish.id] = fish
   })
 
-  var ws = new WebSocket('ws://192.168.0.56:9999/ws')
+  var ws = new WebSocket('ws://localhost:9999/ws')
   ws.onmessage = function(event) {
     const [id, lx, ly, vx, vy] = event.data.split(',')
     const fish = fishById[id]

@@ -1,29 +1,42 @@
 import { createElement } from 'metaverse-api'
-import { IVector } from '../types'
+const Vector = require('../../../../src/Vector')
 
 export interface IFishProps {
-  key: string
-  location: IVector
-  velocity?: IVector
-  mass: number
+  fish: any
 }
 
+const toDeg = (rad: any) => rad / (Math.PI * 2) * 360
+
 export const Fish = (props: IFishProps) => {
-  const { key, location, mass } = props
-  console.log('render fish', location)
-  const x = location.x / 40
-  const z = location.y / 40
-  const hide = x < 0.5 || x > 29.5 || z < 0.5 || z > 29.5
+  const { fish } = props
+  const { id, mass, location, velocity, behaviour } = fish
+  const x = location.x / 60
+  const y = location.y / 60
+  const z = location.z / 60
+  const safeX = Math.max(Math.min(19.5, x), 0.5)
+  const safeY = Math.max(Math.min(10, y), 0.5)
+  const safeZ = Math.max(Math.min(19.5, z), 0.5)
+  const scale = (mass - 0.5) * 5 + 0.5
+  const [angleZ, angleY] = velocity.angles()
   return (
-    <box
-      key={key}
-      position={{ x, y: 0, z }}
-      scale={mass / 5}
+    <cone
+      key={id}
+      position={{ x, y, z }}
+      rotation={{ z: toDeg(angleZ) - 90, y: toDeg(angleY), x: 0 }}
+      scale={mass * mass / 10}
+      segmentsRadial={3}
       transition={{
         position: { duration: 200 }
       }}
-      visible={!hide}
-      color="black"
+      color={
+        id === 0
+          ? 'blue'
+          : behaviour === 'avoid'
+            ? 'red'
+            : behaviour === 'wander'
+              ? 'gray'
+              : 'black'
+      }
     />
   )
 }

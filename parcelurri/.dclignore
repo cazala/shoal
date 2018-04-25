@@ -1,0 +1,12 @@
+.*
+package.json
+package-lock.json
+yarn-lock.json
+build.json
+tsconfig.json
+tslint.json
+node_modules/
+*.ts
+*.tsx
+dist/
+server/

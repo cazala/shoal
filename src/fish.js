@@ -14,21 +14,30 @@ const BEHAVIOURS = {
 }
 
 const HALF_PI = Math.PI / 2
+const SPEED = 9
+
+function inFoV(a, fov) {
+  return true // a < fov / 2 || a > Math.PI * 2 - fov / 2
+}
 
 class Fish {
-  constructor(mass, x, y, seed) {
+  constructor(mass, x, y, z, seed) {
     this.id = uid()
     this.mass = mass
-    this.maxspeed = 12 * this.mass
+    this.maxspeed = SPEED * this.mass
     this.maxforce = 0.1 / this.mass
     this.separationRange = this.mass * 30
-    this.lookRange = this.mass * 200
+    this.lookRange = this.mass * 400
     this.length = mass * 20
     this.base = this.length * 0.5
-    this.location = new Vector(x, y)
-    this.velocity = new Vector(0, 0)
-    this.acceleration = new Vector(0, 0)
-    this.wandering = new Vector(0.2, 0.2)
+    this.location = new Vector(x, y, z)
+    this.velocity = new Vector(0, 0, 0)
+    this.acceleration = new Vector(0, 0, 0)
+    this.wandering = new Vector(
+      this.mass / SPEED,
+      this.mass / SPEED,
+      this.mass / SPEED
+    )
     this.seed = seed || Math.random()
     this.random = seedrandom(this.seed)
   }
@@ -36,7 +45,9 @@ class Fish {
   update() {
     this.velocity.add(this.acceleration)
     this.velocity.limit(this.maxspeed)
-    if (this.velocity.mag() < 2) this.velocity.setMag(5)
+    if (this.velocity.mag() < this.mass * (SPEED / 6)) {
+      this.velocity.setMag(this.mass * (SPEED / 1.5))
+    }
     this.location.add(this.velocity)
     this.acceleration.mul(0)
   }
@@ -45,18 +56,31 @@ class Fish {
     this.acceleration.add(force)
   }
 
-  boundaries(width, height, multi = 3) {
-    if (this.location.x < 0)
-      this.applyForce(new Vector(this.maxforce * multi, 0))
+  boundaries(width, height, depth, multi = 100) {
+    const padding = 20
+    if (this.location.x < padding) {
+      this.applyForce(new Vector(this.maxforce * multi, 0, 0))
+    }
 
-    if (this.location.x > width)
-      this.applyForce(new Vector(-this.maxforce * multi, 0))
+    if (this.location.x > width - padding) {
+      this.applyForce(new Vector(-this.maxforce * multi, 0, 0))
+    }
 
-    if (this.location.y < 0)
-      this.applyForce(new Vector(0, this.maxforce * multi))
+    if (this.location.y < padding) {
+      this.applyForce(new Vector(0, this.maxforce * multi, 0))
+    }
 
-    if (this.location.y > height - 0)
-      this.applyForce(new Vector(0, -this.maxforce * multi))
+    if (this.location.y > height - padding) {
+      this.applyForce(new Vector(0, -this.maxforce * multi, 0))
+    }
+
+    if (this.location.z < padding) {
+      this.applyForce(new Vector(0, 0, this.maxforce * multi))
+    }
+
+    if (this.location.z > depth - padding) {
+      this.applyForce(new Vector(0, 0, -this.maxforce * multi))
+    }
   }
 
   look(fish, radius, angle) {
@@ -64,10 +88,10 @@ class Fish {
     for (let i = 0; i < fish.length; i++) {
       if (fish[i] !== this) {
         const diff = this.location.copy().sub(fish[i].location)
-        const a = this.velocity.angleBetween(diff)
+        const [az, ay] = this.velocity.anglesBetween(diff)
         const d = this.location.dist(fish[i].location)
         const isCloseEnough = d < radius
-        const isInFoV = a < angle / 2 || a > Math.PI * 2 - angle / 2
+        const isInFoV = inFoV(az, angle) && inFoV(ay, angle)
         if (isCloseEnough && isInFoV) {
           neighbors.push(fish[i])
         }
@@ -77,8 +101,12 @@ class Fish {
   }
 
   wander(radius) {
-    if (this.random() < 0.05) {
-      this.wandering.rotate(Math.PI * 2 * this.random())
+    if (this.random() < 0.02) {
+      this.wandering = new Vector(
+        Math.random() * 0.001,
+        Math.random() * 0.001,
+        Math.random() * 0.001
+      )
     }
     this.velocity.add(this.wandering)
     this.behaviour = BEHAVIOURS.WANDER
@@ -120,7 +148,7 @@ class Fish {
 
   attract(body, attractionForce) {
     const force = this.location.copy().sub(body.location)
-    const distance = force.mag()
+    let distance = force.mag()
     distance = distance < 5 ? 5 : distance > 25 ? 25 : distance
     force.normalize()
 
@@ -131,7 +159,7 @@ class Fish {
   }
 
   separate(neighbors, range) {
-    const sum = new Vector(0, 0)
+    const sum = new Vector(0, 0, 0)
 
     if (neighbors.length > 0) {
       for (let i = 0; i < neighbors.length; i++) {
@@ -154,7 +182,7 @@ class Fish {
   }
 
   align(neighbors) {
-    const sum = new Vector(0, 0)
+    const sum = new Vector(0, 0, 0)
 
     if (neighbors.length) {
       for (let i = 0; i < neighbors.length; i++) {
@@ -171,7 +199,7 @@ class Fish {
   }
 
   cohesion(neighbors) {
-    const sum = new Vector(0, 0)
+    const sum = new Vector(0, 0, 0)
 
     if (neighbors.length) {
       for (let i = 0; i < neighbors.length; i++) {
@@ -193,22 +221,22 @@ class Fish {
     const alignment = this.align(neighbors).limit(this.maxforce)
     const cohesion = this.cohesion(neighbors).limit(this.maxforce)
 
-    separation.mul(1.4)
-    alignment.mul(1.2)
-    cohesion.mul(1)
+    separation.mul(2)
+    alignment.mul(1)
+    cohesion.mul(2)
 
     this.applyForce(separation)
     this.applyForce(alignment)
     this.applyForce(cohesion)
 
-    this.behavour = BEHAVIOURS.SHOAL
+    this.behaviour = BEHAVIOURS.SHOAL
   }
 
-  avoid(fish, dist) {
+  avoid(fish, radius) {
     this.avoidList = fish
     for (let i = 0; i < fish.length; i++) {
       var dist = this.location.dist(fish[i].location)
-      if (dist < dist) {
+      if (dist < radius) {
         var force = fish[i].location
           .copy()
           .sub(this.location)
@@ -221,7 +249,7 @@ class Fish {
   }
 
   render(ctx) {
-    const angle = this.velocity.angle()
+    const [angle] = this.velocity.angles()
 
     const x1 = this.location.x + Math.cos(angle) * this.base
     const y1 = this.location.y + Math.sin(angle) * this.base
@@ -290,7 +318,7 @@ Fish.fromJSON = function(json) {
   acceleration = Vector.fromJSON(acceleration)
   wandering = Vector.fromJSON(wandering)
 
-  const fish = new Fish(mass, location.x, location.y, seed)
+  const fish = new Fish(mass, location.x, location.y, location.z, seed)
 
   fish.id = id
   fish.mass = mass

@@ -1,11 +1,10 @@
 import { createServer } from 'http'
 import { Server as WebSocketServer } from 'ws'
-const Sea = require('../../../src/Sea')
+const shoal = require('../../../src')
 
 import { connectedClients, updateAll } from './ConnectedClients'
 import { WebSocketTransport } from 'metaverse-api'
-import RemoteScene from './RemoteScene'
-import { setState } from './State'
+import RemoteScene, { render } from './RemoteScene'
 
 const express = require('express')
 const cors = require('cors')
@@ -33,13 +32,9 @@ server.listen(8087, function listening() {
 })
 
 // Sea
-const sea = new Sea(40, 1200, 1200)
-sea.start()
-sea.on('update', (fish: any) => {
-  const { id, location, velocity, mass } = fish.toJSON(false)
-  setState({
-    [id]: { id, location, velocity, mass }
-  })
-})
-
-setInterval(() => updateAll(), 100)
+const sea = new shoal.Sea(50, 1200, 300, 1200, 200)
+sea.start(64)
+setInterval(() => {
+  render(sea)
+  updateAll()
+}, 100)

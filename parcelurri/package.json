@@ -1,0 +1,10 @@
+{
+  "name": "dcl-project",
+  "version": "1.0.0",
+  "description": "My new Decentraland project",
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "metaverse-api": "^3.1.0"
+  }
+}

@@ -1,15 +1,12 @@
 import { createElement, ScriptableScene } from 'metaverse-api';
-import { getState } from './State';
 import { Sea } from './components/Sea';
 let cachedScene = null;
-export function renderAndCache() {
-    const state = getState();
-    cachedScene = Sea({ sea: state });
+export function render(sea) {
+    cachedScene = Sea({ sea });
 }
 export default class RemoteScene extends ScriptableScene {
     async render() {
-        const state = getState();
-        return createElement("scene", { position: { x: 0, y: 0, z: 0 } }, cachedScene);
+        return (createElement("scene", { position: { x: 0.5, y: 0.5, z: 0.5 }, scale: 0.9 }, cachedScene));
     }
 }
 //# sourceMappingURL=RemoteScene.js.map
